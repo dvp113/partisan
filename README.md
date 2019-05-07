@@ -1,7 +1,7 @@
 Build MVC php artisan (step by step)
 ======================================
 ## Project make by Phuc Nguyen (fresher Laravel)
-Project helper you create Controller, Model, View automation from existing table in database by ONE command line (simple :)) )
+Project help you create Controller, Model, View automation from existing table in database by ONE command line (simple :)) )
 
 ## require composer
 1. Laravel-datatable
