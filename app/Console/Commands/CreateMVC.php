@@ -82,6 +82,9 @@ class CreateMVC extends Command
         //Append Route
         $this->appendRoute($file_attr['file_dir'], $file_attr['file_name']);
 
+        //Remove CSRF in middleware
+        $this->removeCsrf($file_attr['file_name']);
+
         //Create Package
         $this->createPackage();
 
@@ -285,6 +288,32 @@ class CreateMVC extends Command
         $route_file = base_path().'/routes/web.php';
         file_put_contents($route_file, $route_data.PHP_EOL , FILE_APPEND);
 
+        return true;
+    }
+
+    protected function removeCsrf($route_name)
+    {
+        $route_name = lcfirst($route_name);
+        $verifyCsrfToken_file = app_path().'/Http/Middleware/VerifyCsrfToken.php';
+        $content_file = file_get_contents($verifyCsrfToken_file);
+        $pattern = '/protected \$except = \[([\s\S]*?)];/';
+
+        $string_append = "\t'/$route_name',\n\t'/$route_name/*',\n";
+
+        preg_match($pattern, $content_file, $output);       //get string to replace
+        $string_after_append = $output[1].$string_append;   //append route
+        $new_content = str_replace(
+            [
+                $output[1]
+            ],
+            [
+                $string_after_append
+            ],
+            $content_file
+        );
+        file_put_contents($verifyCsrfToken_file, $new_content);
+
+        $this->info('Add Csrf successfully');
         return true;
     }
     protected function createPackage()
