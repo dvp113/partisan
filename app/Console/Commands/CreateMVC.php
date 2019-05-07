@@ -68,11 +68,13 @@ class CreateMVC extends Command
         $full_path = $this->argument('controllerName');
         $file_attr = $this->parsePath($full_path);
 
+        //@TODO Middleware VerifyCsrfToken
+
         //Create Controller
         $this->createController($file_attr['file_dir'], $file_attr['file_name']);
 
         //Create Model
-        $this->createModel($file_attr['file_name']);
+        $this->createModel($file_attr['file_name'], $table_columns);
 
         //Create View
         $this->createView($file_attr['file_name'], $table_columns);
@@ -82,6 +84,9 @@ class CreateMVC extends Command
 
         //Create Package
         $this->createPackage();
+
+
+        $this->info("CREATE MVC SUCCESSFULLY");
     }
 
     protected function parsePath($full_path)
@@ -156,7 +161,7 @@ class CreateMVC extends Command
      *
      * @return mixed
      */
-    protected function createModel($model_name)
+    protected function createModel($model_name, $table_columns)
     {
         $file_name = ucfirst($model_name);
         if (file_exists(base_path().$this->modelPath.$file_name.'.php')) {
@@ -164,23 +169,26 @@ class CreateMVC extends Command
             return false;
         }
 
-        $this->buildModel($file_name);
+        $this->buildModel($file_name, $table_columns);
 
         $this->info($model_name . ' Model created');
 
         return true;
     }
 
-    protected function buildModel($model_name)
+    protected function buildModel($model_name, $table_columns)
     {
+        $render = new RenderTable($table_columns);
+
         $model_name = ucfirst($model_name);
         $table_name = lcfirst($model_name);
+        $table_fillable = $render->getModelFillable();
         $model_content = str_replace(
             [
-                '{{ModelName}}','{{TableName}}'
+                '{{ModelName}}','{{TableName}}', '{{Fillable}}'
             ],
             [
-                $model_name, $table_name
+                $model_name, $table_name, $table_fillable
             ],
             file_get_contents(base_path().$this->templatePath.'/Model.stub')
         );
@@ -214,8 +222,12 @@ class CreateMVC extends Command
         $route = lcfirst($file_dir);
         $route_data = lcfirst($file_dir).'-data';
         $datatable_js = $render->renderDataTableColumnJS();
-        $columns_name = json_encode(array_keys($render->getArrayKey()));
+
+        $create_form = $render->renderCreateModalHTML();
+        $create_columns = json_encode($render->getArrayKeyCreate());
+
         $edit_form = $render->renderEditModalHTML();
+        $edit_columns = json_encode($render->getArrayKeyEdit());
         $view_content = str_replace(
             [
                 '{{Title}}',
@@ -223,9 +235,10 @@ class CreateMVC extends Command
                 '{{Route}}',
                 '{{RouteGetData}}',
                 '{{TableJS}}',
-                '{{ColumnsName}}',
                 '{{EditModal}}',
+                '{{EditColumns}}',
                 '{{CreateModal}}',
+                '{{CreateColumns}}'
             ],
             [
                 ucfirst($file_dir),
@@ -233,9 +246,11 @@ class CreateMVC extends Command
                 $route,
                 $route_data,
                 $datatable_js,
-                $columns_name,
                 $edit_form,
-                'Create Form'
+                $edit_columns,
+                $create_form,
+                $create_columns
+
             ],
             file_get_contents(base_path().$this->templatePath.'/View.stub')
         );
@@ -284,6 +299,12 @@ class CreateMVC extends Command
 
             $this->recurseCopy($source, $destination);
         }
+
+        //Add view layout (hard code)    //layouts && components
+        $layout_source = base_path().$this->templatePath."view_layout/";
+        $layout_destination = base_path().$this->viewPath;
+        $this->recurseCopy($layout_source, $layout_destination);
+
         return true;
 
     }

@@ -8,5 +8,6 @@ class {{ModelName}} extends Model
 {
     //
     protected $table = '{{TableName}}';
+    protected $fillable = {{Fillable}};
     protected $guard = [];
 }

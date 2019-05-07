@@ -1,6 +1,6 @@
 @extends('layouts.default')
 
-@section('title', 'Dashboard Edge')
+@section('title', 'Dashboard Challenge')
 
 @section('content')
     <!-- Modal Edit Edge -->
@@ -62,21 +62,21 @@
                     </div>
                     -->
                     <div class="form-group">
-                        <label for="id">id</label>
-                        <input type="number" class="form-control" id="edit_input_id">
-                    </div>
+                         <label for="id">id</label>
+                         <input type="number" class="form-control" id="edit_input_id"  disabled>
+                       </div>
 <div class="form-group">
-                        <label for="title">title</label>
-                        <input type="text" class="form-control" id="edit_input_title">
-                    </div>
+                         <label for="title">title</label>
+                         <input type="text" class="form-control" id="edit_input_title" >
+                       </div>
 <div class="form-group">
-                        <label for="description">description</label>
-                        <input type="text" class="form-control" id="edit_input_description">
-                    </div>
+                         <label for="description">description</label>
+                         <input type="text" class="form-control" id="edit_input_description" >
+                       </div>
 <div class="form-group">
-                        <label for="max_score">max_score</label>
-                        <input type="number" class="form-control" id="edit_input_max_score">
-                    </div>
+                         <label for="max_score">max_score</label>
+                         <input type="number" class="form-control" id="edit_input_max_score" >
+                       </div>
 
                 </div>
                 <div class="modal-footer">
@@ -87,17 +87,18 @@
         </div>
     </div>
 
-    <!-- Modal Create Edge -->
+    <!-- Modal Create -->
     <div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modal_title">Create New Edge </h5>
+                    <h5 class="modal-title" id="modal_title">Create New Challenge </h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
+                    <!--
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label for="inputPassword4">Name</label>
@@ -140,6 +141,20 @@
                             <input type="number" class="form-control" id="create_input_font_hmargin">
                         </div>
                     </div>
+                    -->
+                    <div class="form-group">
+                         <label for="title">title</label>
+                         <input type="text" class="form-control" id="create_input_title">
+                       </div>
+<div class="form-group">
+                         <label for="description">description</label>
+                         <input type="text" class="form-control" id="create_input_description">
+                       </div>
+<div class="form-group">
+                         <label for="max_score">max_score</label>
+                         <input type="number" class="form-control" id="create_input_max_score">
+                       </div>
+
                 </div>
                 <div class="modal-footer">
                     {{--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>--}}
@@ -187,6 +202,13 @@
 
 @section('custom-js')
     <script>
+        //Array key edit
+        var json_columns = '["id","title","description","max_score"]';
+        var edit_columns = JSON.parse(json_columns);
+
+        //Array key create
+        var json_columns = '["title","description","max_score"]';
+        var create_columns = JSON.parse(json_columns);
 
         $(function() {
             $('#dataTable').DataTable({
@@ -222,25 +244,6 @@
         }
         // create new record
         async function create() {
-            nodes_data = await getAllNodeID();
-            if (!nodes_data){
-                alert("Cannot load data edges");
-                return;
-            }
-
-            //add edge id to selection input
-            $('#create_input_from').empty();
-            $('#create_input_to').empty();
-            $.each(nodes_data, function (i, id) {
-                $('#create_input_from').append($('<option>', {
-                    value: id,
-                    text : id
-                }));
-                $('#create_input_to').append($('<option>', {
-                    value: id,
-                    text : id
-                }));
-            });
 
             //show model
             $('#createModal').modal();
@@ -249,20 +252,17 @@
         //submit create
         function submitCreate() {
             //Prepare Data
-            var create_data = {
-                name        : $('#create_input_name').val(),
-                label       : $('#create_input_label').val(),
-                from        : $('#create_input_from').val(),
-                to          : $('#create_input_to').val(),
-                color       : $('#create_input_color').val(),
-                font_align  : $('#create_input_font_align').val(),
-                font_hmargin: $('#create_input_font_hmargin').val()
-            };
+            var create_data = {};
+            var create_len = create_columns.length;
+            for (i = 0; i < create_len; i++) {
+               let select_input = '#create_input_' + create_columns[i];
+               create_data[create_columns[i]] = $(select_input).val();
+            }
 
             //Call ajax
             $.ajax({
                 type: "POST",
-                url: '/edge',
+                url: '/challenge',
                 data: create_data,
                 dataType: 'text',
             })
@@ -270,7 +270,7 @@
                     console.log(msg)
                     if (msg == "success"){
                         $('#createModal').modal('hide');          //hide modal
-                        alert("Create edge "+create_data['label']+" "+ msg);
+                        alert("Create data "+ msg);
 
                         //reload table
                         reloadTable();
@@ -285,66 +285,40 @@
         async function edit(element)
         {
 
-            /*//Get data for model
+            //Get data for model
             var value = $(element).parent().parent();
             var len = value.children().length;
 
             var data = [];
-            for (i = 0; i < len; i++)
-            {
+            for (i = 0; i < len; i++) {
                 var value1 = value.children().eq(i).html();
                 data.push(value1);
             }
 
             //Fill data to model
-            var font_attr = JSON.parse(data[4]);
-            var color = JSON.parse(data[6]);
-            color = color["color"]? color["color"] : "";
-            //add edge id to selection input
-            $('#edit_input_from').empty();
-            $('#edit_input_to').empty();
-            $.each(nodes_data, function (i, id) {
-                $('#edit_input_from').append($('<option>', {
-                    value: id,
-                    text : id
-                }));
-                $('#edit_input_to').append($('<option>', {
-                    value: id,
-                    text : id
-                }));
-            });
+            var edit_len = edit_columns.length;
+            for (i = 0; i < edit_len; i++){
+                let select_input = '#edit_input_' + edit_columns[i];
+                $(select_input).val(data[i]);
+            }
 
-            $('#edit_input_id').val(data[0]);
-            $('#edit_input_name').val(data[1]);
-            $('#edit_input_from').val(data[2]);
-            $('#edit_input_to').val(data[3]);
-            $('#edit_input_font_align').val(font_attr['align']);
-            $('#edit_input_font_hmargin').val(font_attr['hmargin']);
-            $('#edit_input_label').val(data[5]);
-            $('#edit_input_color').val(color);
-            */
             //show model
             $('#editModal').modal();
         }
 
-        //submit change edge
+        //submit change
         function submitEdit() {
-            //Prepare Data
-            var id = $('#edit_input_id').val();
-            var update_data = {
-                name        : $('#edit_input_name').val(),
-                label       : $('#edit_input_label').val(),
-                from        : $('#edit_input_from').val(),
-                to          : $('#edit_input_to').val(),
-                color       : $('#edit_input_color').val(),
-                font_align  : $('#edit_input_font_align').val(),
-                font_hmargin: $('#edit_input_font_hmargin').val()
-            };
+            var update_data = {};
+            var edit_len = edit_columns.length;
+            for (i = 0; i < edit_len; i++) {
+               let select_input = '#edit_input_' + edit_columns[i];
+               update_data[edit_columns[i]] = $(select_input).val();
+            }
 
             //Call ajax
             $.ajax({
                 type: "PATCH",
-                url: '/challenge/'+id,
+                url: '/challenge/'+ update_data['id'],
                 data: update_data,
                 dataType: 'text',
             })
@@ -353,6 +327,8 @@
                     $('#editModal').modal('hide');          //hide modal
                     //reload table
                     reloadTable();
+
+                    alert('Update record ' + msg);
                 });
         }
 
@@ -374,6 +350,8 @@
 
                     //reload table
                     reloadTable();
+
+                    alert('Delete record ' + msg);
                 });
 
         }

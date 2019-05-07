@@ -12,7 +12,7 @@ use Yajra\DataTables\Facades\DataTables;
 class ChallengeController extends Controller
 {
     /**
-     * Instantiate a new EdgeController instance.
+     * Instantiate a new ChallengeController instance.
      */
     public function __construct()
     {
@@ -58,11 +58,8 @@ class ChallengeController extends Controller
      */
     public function store(Request $request, Challenge $model)
     {
-        //Validata
-        if ($model->isExistEdge($request->input('from'), $request->input('to'))){
-            return "failed : edge is exist!";
-        }
-        //@TODO refactor data
+        //Validate data
+
         $data = $request->all();
 
         $new_record = Challenge::create($data);
@@ -100,23 +97,34 @@ class ChallengeController extends Controller
      */
     public function update(Request $request, Challenge $model)
     {
-        //@TODO refactor data
-        $data = $request->all();
+        $key = 'id';
 
-        //Update data
-        $result = $model->update($data);
-        return $result? "success" : "fail";
+        $data = $request->all();
+        if (!array_key_exists($key, $data)){
+            echo "fail: Key '$key' not found";
+        }
+        else{
+            $id = $data['id'];
+            unset($data['id']);
+
+            //Update data
+            $result = Challenge::find($id)->update($data);
+            return $result? "success" : "fail";
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Challenge  $model
-     * @return \Illuminate\Http\Response
+     * @param  number id
+     * @return "success" || "fail"
      */
-    public function destroy(Challenge $model)
+    public function destroy($id)
     {
-        $deleted_rows = $model->delete();
-        return $deleted_rows? "success" : "fail";
+        if (!is_null($id) && is_numeric($id)){
+            $deleted_rows = Challenge::find($id)->delete();
+            return $deleted_rows? "success" : "fail";
+        }
+        return "fail";
     }
 }
