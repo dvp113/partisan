@@ -292,16 +292,17 @@
         //remove record
         function remove(element)
         {
-            //Get data for model
-            var value = $(element).parent().parent();
-            var id = value.children().eq(0).html();
+            if (confirm('Are you sure you want to remove this record database?')) {
+                //Get data for model
+                var value = $(element).parent().parent();
+                var id = value.children().eq(0).html();
 
-            //Call ajax
-            $.ajax({
-                type: "DELETE",
-                url: '/{{Route}}/'+ id,
-                dataType: 'text',
-            })
+                //Call ajax
+                $.ajax({
+                    type: "DELETE",
+                    url: '/{{Route}}/'+ id,
+                    dataType: 'text',
+                })
                 .done(function( msg ) {
                     console.log(msg);
 
@@ -310,6 +311,9 @@
 
                     alert('Delete record ' + msg);
                 });
+            } else {
+                // Do nothing!
+            }
 
         }
     </script>
