@@ -64,7 +64,6 @@ class CreateMVC extends Command
             return false;
         }
 
-        //
         $full_path = $this->argument('controllerName');
         $file_attr = $this->parsePath($full_path);
 
