@@ -8,12 +8,14 @@
 namespace App\Helpers;
 
 class RenderTable {
-    const HIDDEN_COLUMNS = ['created_at', 'updated_at', 'deleted_at'];
-    const CREATE_MODAL_HIDDEN_COLUMNS = ['id'];
-    protected $Columns = [];
+
+    const HIDDEN_COLUMNS = ['created_at', 'updated_at', 'deleted_at'];      //hide columns to view
+    const DISABLED_COLUMNS = ['id'];                                        //disable columns to view (edit, create)
+
+    protected $Columns = [];        //all columns in table
+
     public function __construct(Array $columns)
     {
-        echo 'chay nha';
         $this->Columns = $columns;
     }
 
@@ -22,6 +24,11 @@ class RenderTable {
         $this->Columns = $columns;
     }
 
+    /*
+     * get columns to show
+     * Output format: array
+     *
+     */
     public function getShowColumn()
     {
         $arr_result = [];
@@ -33,6 +40,11 @@ class RenderTable {
         return $arr_result;
     }
 
+    /*
+     * Render $fillable  for Model
+     * Output format: string
+     *
+     */
     public function getModelFillable()
     {
         $fillable_arr =  $this->getArrayKeyCreate();
@@ -43,13 +55,12 @@ class RenderTable {
     }
 
     /*
-     * render DataTable Column for View
-     * format: HTML
+     * Render Table TH for View
+     * Output format: HTML table
      *
      */
     public function renderDataTableColumnHTML()
     {
-        var_dump($this->Columns);
         if (!count($this->Columns)){
             echo "Not set columns to render";
             return false;
@@ -70,7 +81,7 @@ class RenderTable {
     }
 
     /*
-     * get array key of columns
+     * get array key to edit record
      * result format: Array
      *
      */
@@ -79,12 +90,23 @@ class RenderTable {
         return array_keys($this->getShowColumn());
     }
 
+    /*
+     * get array key to create new record
+     * result format: Array
+     *
+     */
     public function getArrayKeyCreate()
     {
         return array_keys($this->getShowColumnCreateModal());
     }
 
-    //@TODO tao modal create
+    /*
+     * Render Edit Modal for View
+     *      Hide columns not want to show
+     *      Disable columns not accept to create
+     * Output format: html modal
+     *
+     */
     public function renderCreateModalHTML()
     {
         $input_form = "<div class=\"form-group\">
@@ -121,19 +143,31 @@ class RenderTable {
         return $form_result;
     }
 
+    /*
+     * Get columns to show in create modal html
+     * Output format: array
+     *
+     */
     protected function getShowColumnCreateModal()
     {
         $arr_result = [];
         foreach ($this->Columns as $key => $value){
-            if (!in_array($key, self::HIDDEN_COLUMNS) && !in_array($key, self::CREATE_MODAL_HIDDEN_COLUMNS)){
+            if (!in_array($key, self::HIDDEN_COLUMNS) && !in_array($key, self::DISABLED_COLUMNS)){
                 $arr_result[$key] = $value;
             }
         }
         return $arr_result;
     }
+
+    /*
+     * Render Edit Modal for View
+     *      Hide columns not want to show
+     *      Disable columns not accept to edit
+     * Output format: html modal
+     *
+     */
     public function renderEditModalHTML()
     {
-        $disable_input_columns = ['id'];
         $input_form = "<div class=\"form-group\">
                          <label for=\"{{label}}\">{{label}}</label>
                          <input type=\"{{type}}\" class=\"form-control\" id=\"edit_input_{{label}}\" {{otherAttr}}>
@@ -146,7 +180,7 @@ class RenderTable {
             $input_type = 'text';
             $other_attr = '';
 
-            if ( in_array($name,$disable_input_columns)){
+            if ( in_array($name,self::DISABLED_COLUMNS)){
                 $other_attr = $other_attr.' disabled';
             }
 
@@ -178,13 +212,13 @@ class RenderTable {
     }
 
     /*
-     * render DataTable Js for View
-     * format: Javascript
+     * Render DataTable Js for View
+     *      Hide columns not want to show
+     * Output format: Javascript
      *
      */
     public function renderDataTableColumnJS()
     {
-        var_dump($this->Columns);
         if (!count($this->Columns)){
             echo "Not set columns to render";
             return false;

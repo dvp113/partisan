@@ -1,17 +1,19 @@
 Build MVC php artisan (step by step)
 ======================================
 ## Project make by Phuc Nguyen (fresher Laravel)
-Project helper you create Controller, Model, View automation from existing table in database by ONE command line (simple :)) )
+Project help you to create Controller, Model, View automation from existing Table in Database by ONE command line (simple :)) )
 
 ## require composer
 1. Laravel-datatable
-- $ composer require yajra/laravel-datatables-oracle:"~9.0"
+- <code>$ composer require yajra/laravel-datatables-oracle:"~9.0" </code>
 2. Doctrine/dbal (read property in column table)
-- $ composer require doctrine/dbal
+- <code>$ composer require doctrine/dbal </code>
 ## 1. Create (migrate) your database (manual or migrate in laravel).
-## 2. Download folder 'templates' and move to app/resources
-## 3. Move file CreateMVC.php (templates/artisan_command) to app/Console/Commands
-## 4. Move file RenderTable.php (templates/artisan_command) to app/Helpers
-## 5. Run command line 
-- php artisan create-mvc:controller YourControllerName yourtablename
+## 2. Config your database in .evn
+## 3. Download folder 'templates' and move to app/resources
+## 4. Move all files in templates/Commands to app/Console/Commands
+## 5. Move all files in templates/Helpers to app/Helpers
+## 6. Run command line 
+- <code>php artisan make:crud </code> : make all table
+- <code>php artisan create-mvc:controller YourControllerName yourtablename</code> :make one table
 

@@ -87,7 +87,7 @@ class CreateMVC extends Command
         $this->createPackage();
 
 
-        $this->info("CREATE MVC SUCCESSFULLY");
+        $this->info("CREATE MVC FOR TABLE '$table_name' SUCCESSFULLY");
     }
 
     protected function parsePath($full_path)
@@ -107,7 +107,6 @@ class CreateMVC extends Command
         }
 
         //get columns name & type
-        $this->info('table '.$table_name.' is Exist');
         $columns_name = DB::getSchemaBuilder()->getColumnListing($table_name);
         $columns_type = [];
         foreach ($columns_name as $column_name) {
@@ -172,7 +171,7 @@ class CreateMVC extends Command
 
         $this->buildModel($file_name, $table_columns);
 
-        $this->info($model_name . ' Model created');
+        $this->info('Created Model '.$model_name);
 
         return true;
     }
@@ -212,7 +211,7 @@ class CreateMVC extends Command
         }
 
         $this->buildView($view_folder, $view_default, $table_columns);
-        $this->info($view_folder.'/'.$view_default.' Created');
+        $this->info('Created View '.$view_folder.'/'.$view_default);
         return true;
     }
 
